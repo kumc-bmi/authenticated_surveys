@@ -1,0 +1,22 @@
+
+#SAMPLE PYTHON CODE FOR POST REQUEST#
+
+url = URL link to the redcap plugin index file
+
+headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+params = {'full_name':'FN 7, LN 7','user_id':'username7'}
+
+payload = {'action': 'setup',
+           'pid': project_id,
+           'token': project_api_token,
+           'agreement': yes if agreement else no,
+           'survey': survey_name,
+           'record_id_field': record id field in that project,
+           'user_id_field': user id field in that project,
+           'values': json.dumps(params)
+          }
+
+response = requests.post(url,headers = headers,data=payload)
+
+print(response.text)
