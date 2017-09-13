@@ -186,15 +186,24 @@ class SurveyController {
        									);
 			if($successful){
 
-        			$survey_link = generate_survey_link(
+        	        	list($status, $result) = generate_survey_link(
 							       $api_url,
 							       $next_rec_id,
                                                                $survey,
                                                                $post_token);
 
+				if($status == true){
+	
+					$survey_link = $result;
+				}else {
+	
+					return array(false, "Failed in generating survey link due to $result ");
+				}
+				
+
 			}else{	
 
-        			return array(false, "Error in generating survey link");
+        			return array(false, "Error in saving the record due to $error_msg");
         		}	
 
        
@@ -206,10 +215,19 @@ class SurveyController {
         	}else if ($check_agree['survey_complete'] == false and $check_agree['record_num']!= null) {
 			
 			echo "user id already existing";
-			$survey_link = generate_survey_link(   $api_url,
+			list($status, $result) = generate_survey_link(   $api_url,
                                                                $check_agree['record_num'],
                                                                $survey,
                                                                $post_token);
+
+			 if($status == true){
+
+                                        $survey_link = $result;
+                                }else {
+
+                                        return array(false, "Failed in generating survey link due to $result ");
+                            	}
+	
 
 		        $output_survey = add_surveylink_userinfo($survey_link,
                                                                  $params);
@@ -219,10 +237,18 @@ class SurveyController {
 
         	}else if($check_agree['survey_complete'] == true){
 
-			$survey_link = generate_survey_link(   $api_url,
+			 list($status, $result) = generate_survey_link(   $api_url,
                                                                $check_agree['record_num'],
                                                                $survey,
                                                                $post_token);
+
+			 if($status == true){
+
+                                        $survey_link = $result;
+                                }else {
+
+                                        return array(false, "Failed in generating survey link due to $result ");
+                                }
 
 			 return array(true,$survey_link);
 

@@ -71,11 +71,12 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
 
 	$api_request->execute();
         $response_info = $api_request->getResponseInfo();
-        $error_msg = '';
-        
+            
 	if($response_info['http_code'] == 200) {
-        	$api_response = $api_request->getResponseBody();
-             	return $api_response;
+
+        	$api_response = $api_request->getResponseBody(); 
+		return array(true, $api_response);
+
         } else {
         	$api_response = json_decode($api_request->getResponseBody(), 
 				true);
@@ -87,14 +88,30 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
         }	
 }
 
- /* check_agreement_signed() is a common method for all the
-        projects that verifies if the user_id already exists for
-        the given project. If exists, then it checks if the user
-        had already signed the agreement.
-        If already signed then it returns the record_id of the user
-        else returns a string 'not_signed'
-        */
+/*
+Function to check if the user had already signed the agreement.
 
+@param string survey: REDCap Survey name 
+@param string userid_field: user_id label in the specfic project
+@param string userid_value: user_id value which is unique to a user
+@param object heronParticipants: ProjectModel object from the Plugin Framework
+ 
+This function:
+- Gets all the records in that project having the same user_id into an array
+
+- If the length of the array is zero, 
+	then user_id value corresponds to new user. 
+  Returns: 
+  survey_complete as false and record_num as null 
+
+- If the length of the array is not zero, 
+	then there are records with the same user_id
+  - Picks the latest record 
+  - Checks if the agreement is signed. 
+	If yes, returns record_id and survey_complete as true 
+        Else returns record_id and survey_complete as false
+
+*/
 
 function check_agreement_signed($survey,$userid_field,$userid_value,
                	 		$heronParticipants){
