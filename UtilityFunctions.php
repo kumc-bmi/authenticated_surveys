@@ -97,7 +97,7 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
 
 
 function check_agreement_signed($survey,$userid_field,$userid_value,
-               	 		$heronParticipants,$rec_id_label,$pid){
+               	 		$heronParticipants){
 	
 
 	$records_info = $heronParticipants->get_records_by($userid_field,
@@ -106,23 +106,23 @@ function check_agreement_signed($survey,$userid_field,$userid_value,
         	
 	if(count($records_info)!= 0){
 	
-		$rec_num = $heronParticipants->get_record_ids_by(
+		$record_ids = $heronParticipants->get_record_ids_by(
 						$userid_field,
                                                 $userid_value,
                                                 true);
 
-		$rec =  max($rec_num);
+		$latest_record_id =  max($record_ids);
 
-		$userid_latest_rec = $heronParticipants->get_record_by(
-							'record',$rec);
+		$uid_latest_record = $heronParticipants->get_record_by(
+						'record',$latest_record_id);
 
-		if($userid_latest_rec[$survey_complete_field]==2){
+		if($uid_latest_record[$survey_complete_field]==2){
       	               	return array('survey_complete' => true,
-				'record_num' => $userid_latest_rec[$rec_id_label]);
+				'record_num' => $latest_record_id);
 
           	}else{
 			return array('survey_complete' => false,
-				'record_num' => $userid_latest_rec[$rec_id_label]);
+				'record_num' => $latest_record_id);
 		}
           
 	}else{

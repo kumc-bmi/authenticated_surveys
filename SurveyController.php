@@ -161,9 +161,8 @@ class SurveyController {
         	$check_agree  = check_agreement_signed($survey,
                         	                       $user_id_field,
                                 	  	       $user_id_value,
-                                        	       $heronParticipants,
-                                                       $record_id_field,
-                                                       $pid);
+                                        	       $heronParticipants
+                                                       );
 		}
 		else{
 		
@@ -177,8 +176,7 @@ class SurveyController {
 		*/	
 		if (($check_agree['survey_complete'] == false and $check_agree['record_num']== null)or ($this->POST['agreement'] == 'no')){
 
-        		$next_rec_id = $heronParticipants->get_next_record_id(
-								$record_id_field);
+        		$next_rec_id = $heronParticipants->get_next_record_id();
 			echo "\n next user id is $next_rec_id\n";
 			$rec_to_save = $params;
 
