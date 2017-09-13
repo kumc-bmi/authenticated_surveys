@@ -27,7 +27,7 @@ function add_surveylink_userinfo($output_survey,$user_info_array){
 		 	
 	}
 
-        $new_link = $output_survey.''.$user_details;
+        $new_link = $output_survey.$user_details;
         $new_link_no_spaces = str_replace(' ','+',$new_link);
 
         return $new_link_no_spaces;
