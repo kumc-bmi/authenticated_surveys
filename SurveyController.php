@@ -132,9 +132,7 @@ class SurveyController {
 	}
 
 	if ($this->POST['agreement'] == 'yes'){
-
 		if ($user_id_value != null){
-	
         		$check_agree  = check_agreement_signed(
 						$survey,
                 				$user_id_field,
@@ -146,53 +144,46 @@ class SurveyController {
 		}
 
 		if($check_agree['survey_complete'] == true){
-
-			 return $this->create_url($check_agree['record_num'], 
+			  return $this->create_url($check_agree['record_num'], 
 						  $api_url, 
 						  $survey, 
-						  $post_token, 
-						  false);		
+						  $post_token 
+						  );		
 
 		}else if ($check_agree['record_num']!= null){
-
-			 return $this->create_url($check_agree['record_num'], 
+			  return $this->create_url($check_agree['record_num'], 
 						  $api_url, 
 						  $survey, 
-						  $post_token, 
-						  true);			
+						  $post_token
+						  );			
 
 		}else{
-			 
 			list($success, $result) = $this->create_new_record(
 								$params,
 				 				$heronParticipants
 								);
 			if($success){ 
-
-				$this->create_url($result, 
-						  $api_url, 
-						  $survey, 
-						  $post_token, 
-						  true);
+				return $this->create_url($result,
+				  			 $api_url, 
+							 $survey, 
+							 $post_token 
+						  	);
 			}else{
-
 				return array(false, $result);
 			}
-		
 		}
 
 	}else{
-
 		list($success, $result) = $this->create_new_record(
 							$params,
                                                         $heronParticipants
-	                                         );
+	                                                );
                 if ($success){
-	                $this->create_url($result, 
+	                return $this->create_url($result, 
 					  $api_url, 
 					  $survey, 
-					  $post_token, 
-					  true);
+					  $post_token
+					  );
                 }else{
                         return array(false, $result);
                 }
@@ -203,26 +194,21 @@ class SurveyController {
   protected function create_new_record($params,$heronParticipants){
 
 	$next_rec_id = $heronParticipants->get_next_record_id();
-        
 	list($successful, $error_msg) = $heronParticipants->save_record(
-                                                               $params,
-                                                               $next_rec_id
-                                                             );
+						$params,
+						$next_rec_id
+                                                );
 	if($successful){
-	
-		return array(true , $next_rec_id);
-
+		return array(true,$next_rec_id);
 	}else{
-
-              return array(false, "Error in saving the"
-				  ." record due to $error_msg");
+                return array(false, "Error in saving the"
+				    ." record due to $error_msg");
         }
-
   }
 
-  protected function create_url($rec_num, $api_url, $survey, 
-				$post_token, $append){
+  protected function create_url($rec_num, $api_url, $survey, $post_token){
 
+	require_once(AUTH_SURVEY_ROOT.'UtilityFunctions.php');
 	list($status, $result) = generate_survey_link(
 						$api_url,
                                                 $rec_num,
@@ -230,118 +216,14 @@ class SurveyController {
                                                 $post_token
                                                 );
 
-        if($status == true){
-
-	        $survey_link = $result;
-		
-		if($append){
-                	$output_survey = add_surveylink_userinfo($survey_link,
-                        	                                 $rec_to_save);
-                	return array(true,$output_survey);
-
-		}else{
-			
-			return array(true,$survey_link);
-		}
-
+	if($status == true){
+		return array(true,$result);
 	}else {
-
 		return array(false, "Failed in generating survey"
 				    ." link due to $result ");
         }
-
   }	
  		
 }
-
-
-
-		/*
-		If the check agree is false and the record_num is null
-		means that the incoming user id is new then create a new 
-		record and generate the survey link
-		*/	
-	/*if (($check_agree['survey_complete'] == false and $check_agree['record_num']== null)or ($this->POST['agreement'] == 'no')){
-
-        	$next_rec_id = $heronParticipants->get_next_record_id();
-		echo "\n next user id is $next_rec_id\n";
-		$rec_to_save = $params;
-
-        	list($successful, $error_msg) = $heronParticipants->save_record(
-          							$rec_to_save,
-            							$next_rec_id
-       								);
-		if($successful){
-
-        		list($status, $result) = generate_survey_link(
-						       $api_url,
-						       $next_rec_id,
-                                                       $survey,
-                                                       $post_token
-							);
-
-			if($status == true){
-	
-				$survey_link = $result;
-			}else {
-	
-				return array(false, "Failed in generating survey link due to $result ");
-			}
-				
-
-		}else{	
-
-        			return array(false, "Error in saving the record due to $error_msg");
-        	}	
-
-       
-		$output_survey = add_surveylink_userinfo($survey_link,
-						         $rec_to_save);
-
-		return array(true,$output_survey);
-
-        }else if ($check_agree['survey_complete'] == false and $check_agree['record_num']!= null) {
-			
-		list($status, $result) = generate_survey_link( 
-							$api_url,
-                                                        $check_agree['record_num'],
-                                                        $survey,
-                                                        $post_token
-							);
-
-		if($status == true){
-
-                	$survey_link = $result;
-                                
-		}else {
-                        return array(false, "Failed in generating survey link due to $result ");
-               	}
-
-	        $output_survey = add_surveylink_userinfo($survey_link,
-                                                         $params);
-
-                return array(true,$output_survey);
-
-
-        }else if($check_agree['survey_complete'] == true){
-
-		list($status, $result) = generate_survey_link(
-							$api_url,
-                                                        $check_agree['record_num'],
-                                                        $survey,
-                                                        $post_token
-						 	);
-
-		if($status == true){
-	                $survey_link = $result;
-                }else {
-                        return array(false, "Failed in generating survey link due to $result ");
-                 }
-
-		 return array(true,$survey_link);
-
-	}
-    }*/
-
 ?>	
 
