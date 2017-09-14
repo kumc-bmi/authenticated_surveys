@@ -14,7 +14,7 @@ This function,
 - iteratively adds all the field names and values to url,
 - replaces space character with '+' to form a continous url,
 - and returns the appended url. 
-*/
+
 
 function add_surveylink_userinfo($output_survey,$user_info_array){
 
@@ -33,7 +33,7 @@ function add_surveylink_userinfo($output_survey,$user_info_array){
         return $new_link_no_spaces;
 
 }
-
+*/
 /*	
 Function to generate unique survey link specific to a record using REDCap API
 
