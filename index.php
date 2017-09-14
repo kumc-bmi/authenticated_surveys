@@ -35,17 +35,25 @@ require_once(FRAMEWORK_ROOT.'PluginConfig.php');
 $CONFIG = new PluginConfig(AUTH_SURVEY_ROOT.'config.ini');
 
 // Class SurveyController's object handles the incoming HTTP requests
-require_once(AUTH_SURVEY_ROOT.'SurveyController.php');
 
-$controller = new SurveyController(  
-	$_GET,	
-	$_POST,
-	$conn,
-	USERID,
-	$CONFIG
-);
+if($_POST['action'] == surveyLink){
 
-$result = $controller->process_request();
+	require_once(AUTH_SURVEY_ROOT.'SurveyController.php');
+
+	$controller = new SurveyController(  
+			$_GET,	
+			$_POST,
+			$conn,
+			USERID,
+			$CONFIG
+			);
+
+	$result = $controller->process_request();
+
+}else{
+
+	$result = array(false,"Invalid value in action");
+}
 
 // Displaying the reponse of the processed request
 var_dump($result);
