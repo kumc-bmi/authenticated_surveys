@@ -1,6 +1,9 @@
 <?php
 
-
+/*
+An Object to help with handling REDCap surveyLink generation
+HHTP  requesta. 
+*/
 class SurveyController {
 
     protected $GET;
@@ -29,7 +32,9 @@ class SurveyController {
         }
     }
 
-	
+    /*
+	Handle HTTP GET request 
+    */ 		
     protected function handleGET() {
 		
 	$error = 'GET request is invalid.'.
@@ -37,8 +42,21 @@ class SurveyController {
 
 	return array(false,$error);
 
-    }	
+    }
 
+    /*
+
+    Function to validate the authencity of REDCap API token to the project
+
+    @param string pid: project id from the HTTP POST request
+    @param string post_token: REDCap API token from the HTTP POST request
+
+    This function:
+    - Composes a simple API request for project_info using pid and token
+    - Executes the request and receieves the response.Checks for any errors
+    - Returns array(true, null) if there are no errors
+    - Returns array(false,$error_msg) if there are errors  			
+    */
     protected function validatePOST($pid,$post_token) {
 
 	require_once(FRAMEWORK_ROOT.'/RestCallRequest.php');
@@ -82,6 +100,11 @@ class SurveyController {
 	}	
     }	
 
+   /*	
+   Handle HHTP POST request.
+   First validates the POST request.
+   If valid, then calls the main_controller function
+   */	
 
     protected function handlePOST() {
 
@@ -100,9 +123,50 @@ class SurveyController {
 	}
     }
 
+    /*
+
+    Function main_controller() have the entire business logic for generating a 
+    survey link.
+
+    - Checks if the incoming request is for an agreement or for a survey that
+      can be taken multiple times.
+
+    - If the request is an agreement with new user_id then 
+      1. Create a new record with the POST parameters 
+      2. Generate a unique survey link for the record 
+      3. Return the created survey link 
+
+    - If the request is an agreement with existing user_id then check if that 
+      user had already taken the survey, 
+      1. If yes,then return 
+         the survey link which says : The survey had already been submitted. 
+      2. If no, for the existing record, 
+         - Generate the survey link 
+         - Return the survey link 
+
+    - If the request is for a survey that can be taken multiple times, then 
+      1. Create a new record with the POST parameters
+      2. Generate a unique survey link for the record
+      3. Return the created survey link
+
+    - This function also handles the possible errors
+
+    */
+
     protected function main_controller(){
 
-        require_once(FRAMEWORK_ROOT.'ProjectModel.php');
+	/*
+	ProjectModel from REDCap Plugin Framework is used to create 
+        a project specific object 
+	*/ 
+
+	require_once(FRAMEWORK_ROOT.'ProjectModel.php');
+	
+	/*
+	UtilityFunctions have generate_survey_link and check_agreement_signed
+	functions
+ 	*/
+
 	require_once(AUTH_SURVEY_ROOT.'UtilityFunctions.php');
 	
 	$pid = $this->POST['pid'];
@@ -114,23 +178,41 @@ class SurveyController {
 	$user_id_field = $this->POST['user_id_field'];
 	$user_id_value = null;
 
+	/*
+	Creating ProjectModel Object for project received through
+	incoming HTTP POST 
+	*/
+
 	$heronParticipants = new ProjectModel(
 		$pid,
                 $this->CONN
         );
+
+	/*
+	In order to save data into the project, first step is to make it
+	writable
+	*/
 
         $heronParticipants->make_writeable(
                 $api_url,
                 $post_token
         );
 
+	/*
+	From the POST, identifying the user_id value
+	*/
 	foreach ($params as $field_name => $field_value){
 	
 		if($field_name == $user_id_field){
 			$user_id_value = $field_value;
 		}
 	}
-
+	
+	/*
+	Checking for the requested survey is an agreement,
+	If yes, then calling the check_agreement_signed() to see if the
+	user had already signed the agreement
+	*/
 	if ($this->POST['agreement'] == 'yes'){
 		if ($user_id_value != null){
         		$check_agree  = check_agreement_signed(
@@ -140,31 +222,50 @@ class SurveyController {
                                         	$heronParticipants
 						);
 		}else{
-			return array(false, "invalid user_id value");
+			return array(false, "invalid user_id");
 		}
+	
+		/*
+		Checking if the survey is already completed by the user
+		*/
 
 		if($check_agree['survey_complete'] == true){
-			  return $this->create_url($check_agree['record_num'], 
-						  $api_url, 
+			  return generate_survey_link(
+						  $api_url,	
+						  $check_agree['record_num'], 
 						  $survey, 
 						  $post_token 
 						  );		
 
 		}else if ($check_agree['record_num']!= null){
-			  return $this->create_url($check_agree['record_num'], 
-						  $api_url, 
+
+			  /*
+			  If the check_agree[record_num] is not null and
+				 check_agree[survey_complete] is false, then 
+			  user is existing user but have not completed survey
+			  */
+			  return generate_survey_link(
+						  $api_url,
+						  $check_agree['record_num'], 
 						  $survey, 
 						  $post_token
 						  );			
 
 		}else{
+			/*
+			 If the check_agree[record_num] is null and
+                                 check_agree[survey_complete] is false, then
+                          user is new user
+			*/
+
 			list($success, $result) = $this->create_new_record(
 								$params,
 				 				$heronParticipants
 								);
 			if($success){ 
-				return $this->create_url($result,
-				  			 $api_url, 
+				return generate_survey_link(
+				  			 $api_url,
+							 $result, 
 							 $survey, 
 							 $post_token 
 						  	);
@@ -174,13 +275,19 @@ class SurveyController {
 		}
 
 	}else{
+		/*
+		If the POST parameter agreement value is no then need not 
+		check if the agreement is signed but create a new record and
+		generate link every time when there is such request
+		*/  
 		list($success, $result) = $this->create_new_record(
 							$params,
                                                         $heronParticipants
 	                                                );
                 if ($success){
-	                return $this->create_url($result, 
+	                return generate_survey_link( 
 					  $api_url, 
+					  $result,
 					  $survey, 
 					  $post_token
 					  );
@@ -191,6 +298,21 @@ class SurveyController {
 	}
   }
 
+  /*
+  Function to create a new record in REDCap using PluginFramework
+
+  @param array params: 
+	  Record specific details to be saved in the format of
+	  field_name -> field_value pairs
+  @param object heronParticipants: 
+	  ProjectModel object to inline record scope within project
+
+  This function:
+  - Gets next record_id 
+  - Saves the params in that next record_id in the project
+
+  */
+  	
   protected function create_new_record($params,$heronParticipants){
 
 	$next_rec_id = $heronParticipants->get_next_record_id();
@@ -205,25 +327,7 @@ class SurveyController {
 				    ." record due to $error_msg");
         }
   }
-
-  protected function create_url($rec_num, $api_url, $survey, $post_token){
-
-	require_once(AUTH_SURVEY_ROOT.'UtilityFunctions.php');
-	list($status, $result) = generate_survey_link(
-						$api_url,
-                                                $rec_num,
-                                                $survey,
-                                                $post_token
-                                                );
-
-	if($status == true){
-		return array(true,$result);
-	}else {
-		return array(false, "Failed in generating survey"
-				    ." link due to $result ");
-        }
-  }	
- 		
+		
 }
 ?>	
 
