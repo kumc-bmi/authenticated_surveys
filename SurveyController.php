@@ -75,8 +75,6 @@ class SurveyController {
         	
 	$api_request->execute();
         $response_info = $api_request->getResponseInfo();
-        //$api_response = $api_request->getResponseBody();
-        $error_msg = '';
        
 	if($response_info['http_code'] == 200) {
 		$api_response = json_decode(
@@ -84,10 +82,17 @@ class SurveyController {
 			
 		if($api_response['project_id'] == $pid){
 		
-			return array(true,$error_msg);
-		
+			/*return array('validated'=>true,
+				     'error'=>null);
+			*/
+	
+			return array(true,null);
         	}else{
 			$error_msg = 'Invalid Project ID and Token Combination';
+			/*return array('validated'=>false,
+				     'error'=>$error_msg);
+			*/
+
 			return array(false,$error_msg);
 		} 
 		
@@ -97,7 +102,11 @@ class SurveyController {
             	$error_msg = (isset($api_response['error'])
                   		? $api_response['error']
                        		: 'No error returned.');
-            	return array(false, $error_msg);
+            	/*return array('validated'=>false, 
+			     'error'=>$error_msg);
+		*/
+		
+		return array(false,$error_msg);
 	}	
     }	
 
@@ -114,9 +123,13 @@ class SurveyController {
 
 	$check_api_token = $this->validatePOST($pid, $post_token);
 
+	//var_dump($check_api_token);
+
+	//echo $check_api_token['validated'];
+
 	if($check_api_token[0]== false) {
 
-		return array('status'=>false,
+		return array('success'=>false,
 			     'result'=>$check_api_token[1]);
 
 	}else{

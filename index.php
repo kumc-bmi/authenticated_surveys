@@ -36,6 +36,8 @@ $CONFIG = new PluginConfig(AUTH_SURVEY_ROOT.'config.ini');
 
 // Class SurveyController's object handles the incoming HTTP requests
 
+echo "inside php";
+
 if($_POST['action'] == surveyLink){
 
 	require_once(AUTH_SURVEY_ROOT.'SurveyController.php');
@@ -58,6 +60,7 @@ if($_POST['action'] == surveyLink){
 
 // Displaying the reponse of the processed request
 //var_dump($result);
+echo "inside php";
 echo json_encode($result);
 
 /*
