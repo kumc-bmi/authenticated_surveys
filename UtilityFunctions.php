@@ -14,7 +14,7 @@ This function,
 - iteratively adds all the field names and values to url,
 - replaces space character with '+' to form a continous url,
 - and returns the appended url. 
-*/
+
 
 function add_surveylink_userinfo($output_survey,$user_info_array){
 
@@ -27,13 +27,13 @@ function add_surveylink_userinfo($output_survey,$user_info_array){
 		 	
 	}
 
-        $new_link = $output_survey.''.$user_details;
+        $new_link = $output_survey.$user_details;
         $new_link_no_spaces = str_replace(' ','+',$new_link);
 
         return $new_link_no_spaces;
 
 }
-
+*/
 /*	
 Function to generate unique survey link specific to a record using REDCap API
 
@@ -71,11 +71,13 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
 
 	$api_request->execute();
         $response_info = $api_request->getResponseInfo();
-        $error_msg = '';
-        
+            
 	if($response_info['http_code'] == 200) {
-        	$api_response = $api_request->getResponseBody();
-             	return $api_response;
+
+        	$api_response = $api_request->getResponseBody(); 
+		return array('success'=>true, 
+			     'result'=>(string)$api_response);
+
         } else {
         	$api_response = json_decode($api_request->getResponseBody(), 
 				true);
@@ -83,21 +85,38 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
                 $error_msg = (isset($api_response['error'])
                         	    ? $api_response['error']
                                     : 'No error returned.');
-                return array(false, $error_msg);
+                return array('success'=>false, 
+			     'result'=>$error_msg);
         }	
 }
 
- /* check_agreement_signed() is a common method for all the
-        projects that verifies if the user_id already exists for
-        the given project. If exists, then it checks if the user
-        had already signed the agreement.
-        If already signed then it returns the record_id of the user
-        else returns a string 'not_signed'
-        */
+/*
+Function to check if the user had already signed the agreement.
 
+@param string survey: REDCap Survey name 
+@param string userid_field: user_id label in the specfic project
+@param string userid_value: user_id value which is unique to a user
+@param object heronParticipants: ProjectModel object from the Plugin Framework
+ 
+This function:
+- Gets all the records in that project having the same user_id into an array
+
+- If the length of the array is zero, 
+	then user_id value corresponds to new user. 
+  Returns: 
+  survey_complete as false and record_num as null 
+
+- If the length of the array is not zero, 
+	then there are records with the same user_id
+  - Picks the latest record 
+  - Checks if the agreement is signed. 
+	If yes, returns record_id and survey_complete as true 
+        Else returns record_id and survey_complete as false
+
+*/
 
 function check_agreement_signed($survey,$userid_field,$userid_value,
-               	 		$heronParticipants,$rec_id_label,$pid){
+               	 		$heronParticipants){
 	
 
 	$records_info = $heronParticipants->get_records_by($userid_field,
@@ -106,23 +125,23 @@ function check_agreement_signed($survey,$userid_field,$userid_value,
         	
 	if(count($records_info)!= 0){
 	
-		$rec_num = $heronParticipants->get_record_ids_by(
+		$record_ids = $heronParticipants->get_record_ids_by(
 						$userid_field,
                                                 $userid_value,
                                                 true);
 
-		$rec =  max($rec_num);
+		$latest_record_id =  max($record_ids);
 
-		$userid_latest_rec = $heronParticipants->get_record_by(
-							'record',$rec);
+		$uid_latest_record = $heronParticipants->get_record_by(
+						'record',$latest_record_id);
 
-		if($userid_latest_rec[$survey_complete_field]==2){
+		if($uid_latest_record[$survey_complete_field]==2){
       	               	return array('survey_complete' => true,
-				'record_num' => $userid_latest_rec[$rec_id_label]);
+				'record_num' => $latest_record_id);
 
           	}else{
 			return array('survey_complete' => false,
-				'record_num' => $userid_latest_rec[$rec_id_label]);
+				'record_num' => $latest_record_id);
 		}
           
 	}else{
