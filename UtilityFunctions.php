@@ -75,7 +75,8 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
 	if($response_info['http_code'] == 200) {
 
         	$api_response = $api_request->getResponseBody(); 
-		return array(true, $api_response);
+		return array('success'=>true, 
+			     'result'=>(string)$api_response);
 
         } else {
         	$api_response = json_decode($api_request->getResponseBody(), 
@@ -84,7 +85,8 @@ function generate_survey_link($url,$record_num, $survey_name, $post_token) {
                 $error_msg = (isset($api_response['error'])
                         	    ? $api_response['error']
                                     : 'No error returned.');
-                return array(false, $error_msg);
+                return array('success'=>false, 
+			     'result'=>$error_msg);
         }	
 }
 

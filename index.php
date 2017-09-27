@@ -52,12 +52,13 @@ if($_POST['action'] == surveyLink){
 
 }else{
 
-	$result = array(false,"Invalid value in action");
+	$result = array('success'=>false,
+			'result'=>"Invalid value in action");
 }
 
 // Displaying the reponse of the processed request
-var_dump($result);
-
+//var_dump($result);
+echo json_encode($result);
 
 /*
 get_redcap_root() determines the REDCap ROOT path.

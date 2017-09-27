@@ -40,7 +40,8 @@ class SurveyController {
 	$error = 'GET request is invalid.'.
 		 'Should be a POST request';
 
-	return array(false,$error);
+	return array('success'=>false,
+		     'result'=>$error);
 
     }
 
@@ -115,7 +116,8 @@ class SurveyController {
 
 	if($check_api_token[0]== false) {
 
-		return array(false,$check_api_token[1]);
+		return array('status'=>false,
+			     'result'=>$check_api_token[1]);
 
 	}else{
 		$response = $this->main_controller();
@@ -222,7 +224,8 @@ class SurveyController {
                                         	$heronParticipants
 						);
 		}else{
-			return array(false, "invalid user_id");
+			return array('success'=>false, 
+				     'result'=>"Invalid user_id");
 		}
 	
 		/*
@@ -270,7 +273,8 @@ class SurveyController {
 							 $post_token 
 						  	);
 			}else{
-				return array(false, $result);
+				return array('success'=>false, 
+					     'result'=>$result);
 			}
 		}
 
@@ -292,7 +296,8 @@ class SurveyController {
 					  $post_token
 					  );
                 }else{
-                        return array(false, $result);
+                        return array('success'=>false, 
+				     'result'=>$result);
                 }
 		
 	}
@@ -324,7 +329,7 @@ class SurveyController {
 		return array(true,$next_rec_id);
 	}else{
                 return array(false, "Error in saving the"
-				    ." record due to $error_msg");
+				    ." record due to '$error_msg'");
         }
   }
 		
