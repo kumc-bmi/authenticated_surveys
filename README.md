@@ -8,14 +8,14 @@ This plugin is developed to generate authenticated REDCap survey links and make 
 It has four basic functions.
 1. To receive POST request from application and check if the incoming request is for an agreement or for a survey that can be taken multiple times.
 2. If the request is an agreement with new user_id then
-...* Create a new record with the POST parameters
-...* Generate a unique survey link for the record
-...* Return the generated survey link
+   * Create a new record with the POST parameters
+   * Generate a unique survey link for the record
+   * Return the generated survey link
 3. If the request is an agreement with existing user_id then check if that user had already taken the survey, 
-...* If yes,then return the survey link which says : The survey had already been submitted.
-...* If no,for the existing record, 
-....* Generate the survey link
-....* Return the generated survey link
+   * If yes,then return the survey link which says : The survey had already been submitted.
+   * If no,for the existing record, 
+   * Generate the survey link
+   * Return the generated survey link
 4. If the request is for a survey that can be taken multiple times, then repeat the second step
 
 ### REQUIREMENTS ###
@@ -40,6 +40,6 @@ Clone the Authenticated Surveys plugin code into <redcap-root>/plugins/authentic
 
 ### DEVELOPERS ###
 
-Authenticated Surveys - Nazma Kotcherla nkotcherla@kumc.edu
-REDCap Plugin and Hook Framework - Michael Prittie mprittie@kumc.edu
+1. Authenticated Surveys - Nazma Kotcherla nkotcherla@kumc.edu
+2. REDCap Plugin and Hook Framework - Michael Prittie mprittie@kumc.edu
 
