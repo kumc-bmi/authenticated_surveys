@@ -2,7 +2,7 @@
 
 /*
 An Object to help with handling REDCap surveyLink generation
-HHTP  requesta. 
+HTTP  requests. 
 */
 class SurveyController {
 
@@ -82,18 +82,13 @@ class SurveyController {
 			
 		if($api_response['project_id'] == $pid){
 		
-			/*return array('validated'=>true,
+			return array('validated'=>true,
 				     'error'=>null);
-			*/
-	
-			return array(true,null);
+			
         	}else{
 			$error_msg = 'Invalid Project ID and Token Combination';
-			/*return array('validated'=>false,
+			return array('validated'=>false,
 				     'error'=>$error_msg);
-			*/
-
-			return array(false,$error_msg);
 		} 
 		
 	}else {
@@ -102,11 +97,9 @@ class SurveyController {
             	$error_msg = (isset($api_response['error'])
                   		? $api_response['error']
                        		: 'No error returned.');
-            	/*return array('validated'=>false, 
+            	return array('validated'=>false, 
 			     'error'=>$error_msg);
-		*/
 		
-		return array(false,$error_msg);
 	}	
     }	
 
@@ -123,14 +116,10 @@ class SurveyController {
 
 	$check_api_token = $this->validatePOST($pid, $post_token);
 
-	//var_dump($check_api_token);
-
-	//echo $check_api_token['validated'];
-
-	if($check_api_token[0]== false) {
+	if($check_api_token['validated']== false) {
 
 		return array('success'=>false,
-			     'result'=>$check_api_token[1]);
+			     'result'=>$check_api_token['error']);
 
 	}else{
 		$response = $this->main_controller();
