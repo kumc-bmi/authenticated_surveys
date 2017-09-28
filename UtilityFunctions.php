@@ -1,39 +1,5 @@
 <?php
 
-/*
-Function to append user info to the survey link
-
-@param string $output_survey: 
-	REDCap survey url to which user details need to be appended
-@param array $user_info_array: 
-	Associative array that has user details in 
-	field_name => field_value format 
-	which should be appended to the survey url
-
-This function,
-- iteratively adds all the field names and values to url,
-- replaces space character with '+' to form a continous url,
-- and returns the appended url. 
-
-
-function add_surveylink_userinfo($output_survey,$user_info_array){
-
-	$user_details = null;
-
-	foreach($user_info_array as $field_name => $field_value){
-		
-		$user_details = $user_details.'&'.
-				$field_name.'='.$field_value; 
-		 	
-	}
-
-        $new_link = $output_survey.$user_details;
-        $new_link_no_spaces = str_replace(' ','+',$new_link);
-
-        return $new_link_no_spaces;
-
-}
-*/
 /*	
 Function to generate unique survey link specific to a record using REDCap API
 
@@ -49,7 +15,7 @@ Function to generate unique survey link specific to a record using REDCap API
 This function
 - Creates RestCallRequest object
 - Executes the request
-- Returns tha response to the calling function if the http-code 200 else
+- Returns the survey link to the calling function if the http-code 200 else
   decodes the error message and returns it to the calling method.
 */
 
