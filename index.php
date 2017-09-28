@@ -4,7 +4,7 @@
  * PLUGIN NAME: Authenticated Surveys Plugin 
  * DESCRIPTION: Developed by the University of Kansas Medical Center's Medical
  *              Informatics Department to generate secure survey links 
-		for integrating other applications like HERON with Redcap
+		for integrating other applications like HERON with REDCap
  * VERSION: 1.0
  * AUTHOR: Michael Prittie, Nazma Sulthana
  */
@@ -36,22 +36,27 @@ $CONFIG = new PluginConfig(AUTH_SURVEY_ROOT.'config.ini');
 
 // Class SurveyController's object handles the incoming HTTP requests
 
-echo "inside php";
-
 if($_POST['action'] == surveyLink){
 
-	require_once(AUTH_SURVEY_ROOT.'SurveyController.php');
+	if($_POST['agreement'] == 'yes' or $_POST['agreement'] == 'no'){
 
-	$controller = new SurveyController(  
-			$_GET,	
-			$_POST,
-			$conn,
-			USERID,
-			$CONFIG
-			);
+		require_once(AUTH_SURVEY_ROOT.'SurveyController.php');
 
-	$result = $controller->process_request();
+		$controller = new SurveyController(  
+				$_GET,	
+				$_POST,
+				$conn,
+				USERID,
+				$CONFIG
+				);
 
+		$result = $controller->process_request();
+	}else{
+		
+		$result = array('success'=>false,
+                                'result'=>"Agreement value should be yes/no");
+
+	}
 }else{
 
 	$result = array('success'=>false,
@@ -59,8 +64,7 @@ if($_POST['action'] == surveyLink){
 }
 
 // Displaying the reponse of the processed request
-//var_dump($result);
-echo "inside php";
+
 echo json_encode($result);
 
 /*
